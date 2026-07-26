@@ -1,0 +1,9 @@
+{
+  "name": "my-pi-packages",
+  "private": true,
+  "keywords": ["pi-package"],
+  "pi": {
+    "extensions": ["./extensions"],
+    "skills": ["./skills"]
+  }
+}
