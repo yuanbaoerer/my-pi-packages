@@ -8,16 +8,39 @@
  *   "帮我用 last30days 调研一下 AI agent 趋势"   <- 自然语言，agent 自动调用 tool
  */
 
-import { fileURLToPath } from "node:url";
-import { dirname, resolve } from "node:path";
+import { existsSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import { Type } from "typebox";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
-// Resolve skill directory relative to this extension file (inside the package)
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const PACKAGE_ROOT = resolve(__dirname, "..");
-const SKILL_DIR = resolve(PACKAGE_ROOT, "skills/last30days");
-const SKILL_FILE = resolve(SKILL_DIR, "SKILL.md");
+/**
+ * Resolve the last30days skill directory.
+ * Looks for it in pi's git package directory first, then global skills.
+ * The skill must be installed separately via:
+ *   pi install git:github.com/mvanhorn/last30days-skill
+ */
+function resolveLast30daysSkill(): { skillDir: string; skillFile: string } {
+  const candidates = [
+    // pi install git:github.com/mvanhorn/last30days-skill
+    join(homedir(), ".pi/agent/git/github.com/mvanhorn/last30days-skill/skills/last30days"),
+    // legacy: manually cloned to global skills
+    join(homedir(), ".pi/agent/skills/last30days"),
+  ];
+
+  for (const dir of candidates) {
+    const file = join(dir, "SKILL.md");
+    if (existsSync(file)) {
+      return { skillDir: dir, skillFile: file };
+    }
+  }
+
+  throw new Error(
+    "last30days skill 未安装。请先运行:\n" +
+      "  pi install git:github.com/mvanhorn/last30days-skill\n" +
+      "然后 /reload 重新加载。"
+  );
+}
 
 export default function (pi: ExtensionAPI) {
   // ============================================================
@@ -83,17 +106,28 @@ export default function (pi: ExtensionAPI) {
         };
       }
 
+      // 解析 last30days skill 路径
+      let skillDir: string, skillFile: string;
+      try {
+        ({ skillDir, skillFile } = resolveLast30daysSkill());
+      } catch (err: any) {
+        return {
+          content: [{ type: "text", text: err.message }],
+          details: {},
+        };
+      }
+
       // 构造只含 last30days skill 的 ResourceLoader
       const loader = new DefaultResourceLoader({
-        cwd: SKILL_DIR,
+        cwd: skillDir,
         skillsOverride: (current) => ({
           skills: [
             {
               name: "last30days",
               description:
                 "Research any topic from the last 30 days across Reddit, X, YouTube, TikTok, Hacker News, Polymarket, GitHub, and the web. Pulls posts, comments, engagement, and synthesizes a grounded summary.",
-              filePath: SKILL_FILE,
-              baseDir: SKILL_DIR,
+              filePath: skillFile,
+              baseDir: skillDir,
               source: "last30days",
             },
           ],
@@ -110,7 +144,7 @@ export default function (pi: ExtensionAPI) {
         modelRuntime,
         model: available[0],
         thinkingLevel: "off",
-        cwd: SKILL_DIR,
+        cwd: skillDir,
         tools: ["read", "bash", "write", "edit"],
       });
 
