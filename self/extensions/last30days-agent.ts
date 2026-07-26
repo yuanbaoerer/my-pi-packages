@@ -10,18 +10,20 @@
 
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { Type } from "typebox";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 /**
  * Resolve the last30days skill directory.
- * Looks for it in pi's git package directory first, then global skills.
- * The skill must be installed separately via:
- *   pi install git:github.com/mvanhorn/last30days-skill
+ * Checks: vendored in my-pi-packages → pi install → global skills.
  */
 function resolveLast30daysSkill(): { skillDir: string; skillFile: string } {
+  // vendored: same package, vendored/skills/last30days
+  const packageRoot = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
   const candidates = [
+    join(packageRoot, "vendored/skills/last30days"),
     // pi install git:github.com/mvanhorn/last30days-skill
     join(homedir(), ".pi/agent/git/github.com/mvanhorn/last30days-skill/skills/last30days"),
     // legacy: manually cloned to global skills
