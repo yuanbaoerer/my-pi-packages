@@ -8,11 +8,16 @@
  *   "帮我用 last30days 调研一下 AI agent 趋势"   <- 自然语言，agent 自动调用 tool
  */
 
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
 import { Type } from "typebox";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
-const SKILL_DIR = "/home/yuanbaoer/last30days-skill/skills/last30days";
-const SKILL_FILE = `${SKILL_DIR}/SKILL.md`;
+// Resolve skill directory relative to this extension file (inside the package)
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PACKAGE_ROOT = resolve(__dirname, "..");
+const SKILL_DIR = resolve(PACKAGE_ROOT, "skills/last30days");
+const SKILL_FILE = resolve(SKILL_DIR, "SKILL.md");
 
 export default function (pi: ExtensionAPI) {
   // ============================================================
