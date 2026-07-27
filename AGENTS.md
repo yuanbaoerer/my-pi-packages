@@ -42,15 +42,6 @@ package.json      # pi package manifest declaring self/ and vendored/ paths
 2. Record the upstream source (URL) in the vendored directory or a comment.
 3. Minimize local modifications — prefer contributing upstream.
 
-## External dependencies
-
-The `last30days` skill used by `self/extensions/last30days-agent.ts` must be installed
-separately on each device:
-```
-pi install git:github.com/mvanhorn/last30days-skill
-```
-The extension auto-discovers it from pi's git package directory.
-
 ## When modifying
 
 - Read the current file first, then edit.

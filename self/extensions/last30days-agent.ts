@@ -17,15 +17,13 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 /**
  * Resolve the last30days skill directory.
- * Checks: vendored in my-pi-packages → pi install → global skills.
+ * Checks: vendored in my-pi-packages → global skills (legacy).
  */
 function resolveLast30daysSkill(): { skillDir: string; skillFile: string } {
   // vendored: same package, vendored/skills/last30days
   const packageRoot = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
   const candidates = [
     join(packageRoot, "vendored/skills/last30days"),
-    // pi install git:github.com/mvanhorn/last30days-skill
-    join(homedir(), ".pi/agent/git/github.com/mvanhorn/last30days-skill/skills/last30days"),
     // legacy: manually cloned to global skills
     join(homedir(), ".pi/agent/skills/last30days"),
   ];
@@ -38,9 +36,7 @@ function resolveLast30daysSkill(): { skillDir: string; skillFile: string } {
   }
 
   throw new Error(
-    "last30days skill 未安装。请先运行:\n" +
-      "  pi install git:github.com/mvanhorn/last30days-skill\n" +
-      "然后 /reload 重新加载。"
+    "last30days skill 未安装。请确认 vendored/skills/last30days/ 目录存在。"
   );
 }
 

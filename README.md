@@ -23,12 +23,10 @@
 ## 安装
 
 ```bash
-# 本仓库
 pi install git:github.com/yuanbaoerer/my-pi-packages
-
-# 配套第三方包（需单独安装）
-pi install git:github.com/mvanhorn/last30days-skill
 ```
+
+last30days 调研引擎已 vendored 在 `vendored/skills/last30days/`，无需额外安装。
 
 ## 添加资源
 
